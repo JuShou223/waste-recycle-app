@@ -1,0 +1,162 @@
+.scan-container {
+  background: #f5f5f5;
+  min-height: 100vh;
+  padding-bottom: 20px;
+}
+
+.scan-header {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  padding: 40px 20px;
+  text-align: center;
+  color: white;
+
+  .header-title {
+    font-size: 24px;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .header-subtitle {
+    font-size: 14px;
+    opacity: 0.9;
+  }
+}
+
+.scan-area {
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+
+  .qr-frame {
+    width: 250px;
+    height: 250px;
+    position: relative;
+    background: rgba(255, 255, 255, 0.8);
+    border: 2px solid #52c41a;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .corner {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border: 3px solid #52c41a;
+
+      &.top-left {
+        top: -3px;
+        left: -3px;
+        border-right: none;
+        border-bottom: none;
+        border-radius: 12px 0 0 0;
+      }
+
+      &.top-right {
+        top: -3px;
+        right: -3px;
+        border-left: none;
+        border-bottom: none;
+        border-radius: 0 12px 0 0;
+      }
+
+      &.bottom-left {
+        bottom: -3px;
+        left: -3px;
+        border-right: none;
+        border-top: none;
+        border-radius: 0 0 0 12px;
+      }
+
+      &.bottom-right {
+        bottom: -3px;
+        right: -3px;
+        border-left: none;
+        border-top: none;
+        border-radius: 0 0 12px 0;
+      }
+    }
+
+    .scan-hint {
+      font-size: 16px;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+  }
+}
+
+.action-section {
+  padding: 0 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  .scan-btn, .manual-btn {
+    height: 48px;
+    border-radius: 8px;
+    font-size: 16px;
+  }
+
+  .scan-btn {
+    background: #52c41a;
+  }
+}
+
+.instructions-card, .tips-card {
+  margin: 0 16px 16px;
+
+  .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    padding: 16px 16px 8px;
+  }
+}
+
+.instruction-list {
+  padding: 0 16px 16px;
+
+  .instruction-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 12px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .instruction-number {
+      width: 24px;
+      height: 24px;
+      border-radius: 12px;
+      background: #52c41a;
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .instruction-text {
+      font-size: 14px;
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+  }
+}
+
+.tips-content {
+  padding: 0 16px 16px;
+
+  .tip-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    display: block;
+  }
+}
