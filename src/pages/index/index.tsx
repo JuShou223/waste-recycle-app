@@ -1,123 +1,167 @@
-// import { Component } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, Image } from "@tarojs/components";
-import { navigateTo } from "@tarojs/taro";
-import { Grid, Card } from "@nutui/nutui-react-taro";
+import Taro from "@tarojs/taro";
+import { User, RecycleRecord } from "@/types";
+import { STORAGE_KEYS } from "@/constants";
+import storage from "@/utils/storage";
 import "./index.scss";
 
-export default function Index() {
-  const gridData = [
-    {
-      text: "扫码回收",
-      icon: "📱",
-      path: "/pages/scan/index",
-    },
-    {
-      text: "附近回收箱",
-      icon: "🗺️",
-      path: "/pages/map/index",
-    },
-    {
-      text: "垃圾分类",
-      icon: "🗂️",
-      path: "/pages/classification/index",
-    },
-    {
-      text: "积分兑换",
-      icon: "🎁",
-      path: "/pages/exchange/index",
-    },
-  ];
+const Index: React.FC = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [recentRecords, setRecentRecords] = useState<RecycleRecord[]>([]);
+  const [todayPoints, setTodayPoints] = useState(0);
 
-  const handleGridClick = (path: string) => {
-    navigateTo({ url: path });
+  useEffect(() => {
+    loadUserInfo();
+    loadRecentData();
+  }, []);
+
+  const loadUserInfo = async () => {
+    const userInfo = storage.getSync<User>(STORAGE_KEYS.USER_INFO);
+    if (userInfo) {
+      setUser(userInfo);
+    }
+  };
+
+  const loadRecentData = async () => {
+    // 模拟加载最近数据
+    setRecentRecords([
+      {
+        id: "1",
+        boxId: "box001",
+        boxName: "小区A栋回收箱",
+        category: {
+          id: "1",
+          name: "可回收垃圾",
+          color: "#3B82F6",
+          icon: "recycle",
+          description: "",
+          examples: [],
+        },
+        weight: 2.5,
+        points: 25,
+        createTime: "2025-01-11 14:30",
+        status: "success",
+      },
+    ]);
+    setTodayPoints(25);
+  };
+
+  const handleScan = () => {
+    Taro.navigateTo({
+      url: "/pages/scan/index",
+    });
+  };
+
+  const handleMapView = () => {
+    Taro.navigateTo({
+      url: "/pages/map/index",
+    });
+  };
+
+  const handlePointsDetail = () => {
+    Taro.switchTab({
+      url: "/pages/points/index",
+    });
   };
 
   return (
-    <View className="index-container">
-      {/* Header Section */}
-      <View className="header-section">
+    <View className="page index-page">
+      {/* 用户信息卡片 */}
+      <View className="user-card">
         <View className="user-info">
           <Image
             className="avatar"
-            src="https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&w=100&h=100&fit=crop"
-            mode="aspectFill"
+            src={
+              user?.avatar ||
+              "https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&w=100"
+            }
           />
-          <View className="user-details">
-            <Text className="username">环保达人</Text>
-            <Text className="user-points">当前积分: 1,250</Text>
+          <View className="info">
+            <Text className="nickname">{user?.nickname || "环保达人"}</Text>
+            <Text className="level">环保专家 · {user?.points || 1250}积分</Text>
           </View>
         </View>
+        <View className="today-points">
+          <Text className="points-num">+{todayPoints}</Text>
+          <Text className="points-label">今日积分</Text>
+        </View>
+      </View>
 
-        <View className="stats-row">
+      {/* 快捷功能 */}
+      <View className="quick-actions card">
+        <View className="action-item" onClick={handleScan}>
+          <View className="action-icon scan">📷</View>
+          <Text className="action-text">扫码回收</Text>
+        </View>
+        <View className="action-item" onClick={handleMapView}>
+          <View className="action-icon map">🗺️</View>
+          <Text className="action-text">查找回收箱</Text>
+        </View>
+        <View className="action-item" onClick={handlePointsDetail}>
+          <View className="action-icon points">💎</View>
+          <Text className="action-text">积分明细</Text>
+        </View>
+        <View className="action-item">
+          <View className="action-icon guide">📖</View>
+          <Text className="action-text">分类指引</Text>
+        </View>
+      </View>
+
+      {/* 今日统计 */}
+      <View className="stats-section">
+        <Text className="section-title">今日统计</Text>
+        <View className="stats-grid">
           <View className="stat-item">
-            <Text className="stat-number">28</Text>
-            <Text className="stat-label">本月回收</Text>
+            <Text className="stat-number">3</Text>
+            <Text className="stat-label">投递次数</Text>
           </View>
           <View className="stat-item">
-            <Text className="stat-number">3.2kg</Text>
-            <Text className="stat-label">累计重量</Text>
+            <Text className="stat-number">5.2kg</Text>
+            <Text className="stat-label">回收重量</Text>
           </View>
           <View className="stat-item">
-            <Text className="stat-number">15</Text>
-            <Text className="stat-label">环保排名</Text>
+            <Text className="stat-number">25</Text>
+            <Text className="stat-label">获得积分</Text>
+          </View>
+          <View className="stat-item">
+            <Text className="stat-number">12</Text>
+            <Text className="stat-label">排名</Text>
           </View>
         </View>
       </View>
 
-      {/* Notice */}
-      <View className="notice-section">
-        {/* <Notice
-          content='🎉 积分双倍活动进行中，快来参与回收吧！'
-          color='#52c41a'
-          background='#f6ffed'
-          leftIcon='https://img10.360buyimg.com/imagetools/jfs/t1/72048/40/2998/1194/5d0a3c84E5c52f7e2/d70f4353b6b43e19.png'
-        /> */}
-      </View>
-
-      {/* Quick Actions */}
-      <Card className="quick-actions">
-        <View className="card-title">快速操作</View>
-        <Grid>
-          {gridData.map((item, index) => (
-            <Grid.Item key={index} onClick={() => handleGridClick(item.path)}>
-              <View className="grid-item">
-                <Text className="grid-icon">{item.icon}</Text>
-                <Text className="grid-text">{item.text}</Text>
+      {/* 最近记录 */}
+      <View className="recent-section">
+        <Text className="section-title">最近记录</Text>
+        <View className="records-list">
+          {recentRecords.map((record) => (
+            <View key={record.id} className="record-item">
+              <View className="record-info">
+                <Text className="record-title">{record.boxName}</Text>
+                <Text className="record-detail">
+                  {record.category.name} · {record.weight}kg
+                </Text>
+                <Text className="record-time">{record.createTime}</Text>
               </View>
-            </Grid.Item>
+              <Text className="record-points">+{record.points}</Text>
+            </View>
           ))}
-        </Grid>
-      </Card>
-
-      {/* Recent Activities */}
-      <Card className="recent-activities">
-        <View className="card-title">最近活动</View>
-        <View className="activity-list">
-          <View className="activity-item">
-            <View className="activity-icon success">✓</View>
-            <View className="activity-content">
-              <Text className="activity-text">投递纸类垃圾 0.8kg</Text>
-              <Text className="activity-time">2小时前</Text>
-            </View>
-            <Text className="activity-points">+20分</Text>
-          </View>
-          <View className="activity-item">
-            <View className="activity-icon success">✓</View>
-            <View className="activity-content">
-              <Text className="activity-text">投递塑料瓶 0.3kg</Text>
-              <Text className="activity-time">1天前</Text>
-            </View>
-            <Text className="activity-points">+15分</Text>
-          </View>
-          <View className="activity-item">
-            <View className="activity-icon warning">!</View>
-            <View className="activity-content">
-              <Text className="activity-text">回收箱已满，请选择其他位置</Text>
-              <Text className="activity-time">2天前</Text>
-            </View>
-          </View>
         </View>
-      </Card>
+      </View>
+
+      {/* 环保提示 */}
+      <View className="tip-card card">
+        <View className="tip-icon">🌱</View>
+        <View className="tip-content">
+          <Text className="tip-title">环保小贴士</Text>
+          <Text className="tip-text">
+            每回收1kg废纸，可以拯救17棵树！让我们一起守护地球家园。
+          </Text>
+        </View>
+      </View>
     </View>
   );
-}
+};
+
+export default Index;

@@ -1,110 +1,150 @@
-import { View, Text, Button } from '@tarojs/components'
-import { showToast, scanCode } from '@tarojs/taro'
-import { Card } from '@nutui/nutui-react-taro'
+import React, { useState } from 'react'
+import { View, Text, Camera } from '@tarojs/components'
+import Taro from '@tarojs/taro'
 import './index.scss'
 
-export default function Scan() {
-  const handleScan = async () => {
-    try {
-      const result = await scanCode({
-        scanType: ['qrCode', 'barCode']
-      })
-      
-      // Simulate box opening process
-      showToast({
-        title: '正在开启回收箱...',
-        icon: 'loading',
-        duration: 2000
-      })
+const Scan: React.FC = () => {
+  const [scanning, setScanning] = useState(true)
 
-      setTimeout(() => {
-        showToast({
-          title: '回收箱已开启',
-          icon: 'success'
+  const handleScan = () => {
+    Taro.scanCode({
+      success: (res) => {
+        console.log('扫码结果:', res)
+        handleScanResult(res.result)
+      },
+      fail: (err) => {
+        console.error('扫码失败:', err)
+        Taro.showToast({
+          title: '扫码失败，请重试',
+          icon: 'error'
         })
-      }, 2000)
+      }
+    })
+  }
 
-    } catch (error) {
-      showToast({
-        title: '扫码失败，请重试',
-        icon: 'none'
+  const handleScanResult = (code: string) => {
+    // 解析二维码内容
+    if (code.startsWith('recycle_box_')) {
+      const boxId = code.replace('recycle_box_', '')
+      openRecycleBox(boxId)
+    } else {
+      Taro.showToast({
+        title: '无效的回收箱二维码',
+        icon: 'error'
       })
     }
   }
 
-  const handleManualInput = () => {
-    showToast({
-      title: '手动输入功能开发中',
-      icon: 'none'
-    })
+  const openRecycleBox = (boxId: string) => {
+    Taro.showLoading({ title: '正在开启回收箱...' })
+    
+    // 模拟开箱过程
+    setTimeout(() => {
+      Taro.hideLoading()
+      Taro.showModal({
+        title: '回收箱已开启',
+        content: '请投入您的垃圾，投递完成后回收箱会自动称重并记录积分。',
+        confirmText: '已投递完成',
+        cancelText: '取消投递',
+        success: (res) => {
+          if (res.confirm) {
+            processRecycle(boxId)
+          }
+        }
+      })
+    }, 2000)
+  }
+
+  const processRecycle = (boxId: string) => {
+    Taro.showLoading({ title: '正在称重...' })
+    
+    // 模拟称重过程
+    setTimeout(() => {
+      Taro.hideLoading()
+      const weight = (Math.random() * 5 + 0.5).toFixed(1) // 随机生成重量
+      const points = Math.floor(parseFloat(weight) * 10) // 计算积分
+      
+      Taro.showModal({
+        title: '投递成功！',
+        content: `本次投递重量：${weight}kg\n获得积分：${points}分\n感谢您为环保事业做出的贡献！`,
+        showCancel: false,
+        confirmText: '查看积分',
+        success: () => {
+          Taro.switchTab({
+            url: '/pages/points/index'
+          })
+        }
+      })
+    }, 3000)
   }
 
   return (
-    <View className='scan-container'>
-      <View className='scan-header'>
-        <Text className='header-title'>扫码开箱</Text>
-        <Text className='header-subtitle'>扫描回收箱上的二维码</Text>
+    <View className="page scan-page">
+      <View className="scan-header">
+        <Text className="scan-title">扫码回收</Text>
+        <Text className="scan-desc">对准回收箱上的二维码进行扫描</Text>
       </View>
 
-      <View className='scan-area'>
-        <View className='qr-frame'>
-          <View className='corner top-left'></View>
-          <View className='corner top-right'></View>
-          <View className='corner bottom-left'></View>
-          <View className='corner bottom-right'></View>
-          <Text className='scan-hint'>将二维码放入框内</Text>
+      <View className="scan-container">
+        <View className="scan-frame">
+          <View className="scan-corner tl"></View>
+          <View className="scan-corner tr"></View>
+          <View className="scan-corner bl"></View>
+          <View className="scan-corner br"></View>
+          <View className="scan-line"></View>
         </View>
-      </View>
-
-      <View className='action-section'>
-        <Button 
-          type='primary' 
-          className='scan-btn'
-          onClick={handleScan}
-        >
-          开始扫码
-        </Button>
         
-        <Button 
-          type='default' 
-          className='manual-btn'
-          onClick={handleManualInput}
-        >
-          手动输入设备编号
-        </Button>
+        <View className="scan-btn" onClick={handleScan}>
+          <View className="scan-icon">📷</View>
+          <Text className="scan-text">点击扫码</Text>
+        </View>
       </View>
 
-      <Card className='instructions-card'>
-        <View className='card-title'>使用说明</View>
-        <View className='instruction-list'>
-          <View className='instruction-item'>
-            <Text className='instruction-number'>1</Text>
-            <Text className='instruction-text'>找到回收箱上的二维码标识</Text>
+      <View className="tips-section">
+        <Text className="tips-title">使用说明</Text>
+        <View className="tips-list">
+          <View className="tip-item">
+            <View className="tip-number">1</View>
+            <Text className="tip-text">找到附近的智能回收箱</Text>
           </View>
-          <View className='instruction-item'>
-            <Text className='instruction-number'>2</Text>
-            <Text className='instruction-text'>点击"开始扫码"按钮进行扫描</Text>
+          <View className="tip-item">
+            <View className="tip-number">2</View>
+            <Text className="tip-text">扫描回收箱上的二维码</Text>
           </View>
-          <View className='instruction-item'>
-            <Text className='instruction-number'>3</Text>
-            <Text className='instruction-text'>扫码成功后回收箱将自动开启</Text>
+          <View className="tip-item">
+            <View className="tip-number">3</View>
+            <Text className="tip-text">按照分类要求投入垃圾</Text>
           </View>
-          <View className='instruction-item'>
-            <Text className='instruction-number'>4</Text>
-            <Text className='instruction-text'>投递完成后盖子会自动关闭</Text>
+          <View className="tip-item">
+            <View className="tip-number">4</View>
+            <Text className="tip-text">系统自动称重并奖励积分</Text>
           </View>
         </View>
-      </Card>
+      </View>
 
-      <Card className='tips-card'>
-        <View className='card-title'>温馨提示</View>
-        <View className='tips-content'>
-          <Text className='tip-text'>• 请确保垃圾分类正确</Text>
-          <Text className='tip-text'>• 投递时请轻拿轻放</Text>
-          <Text className='tip-text'>• 重量越大积分越多</Text>
-          <Text className='tip-text'>• 如遇故障请联系客服</Text>
+      <View className="quick-actions card">
+        <Text className="actions-title">快捷操作</Text>
+        <View className="actions-grid">
+          <View className="action-item">
+            <View className="action-icon">🗺️</View>
+            <Text className="action-text">查找回收箱</Text>
+          </View>
+          <View className="action-item">
+            <View className="action-icon">📖</View>
+            <Text className="action-text">分类指引</Text>
+          </View>
+          <View className="action-item">
+            <View className="action-icon">💎</View>
+            <Text className="action-text">我的积分</Text>
+          </View>
+          <View className="action-item">
+            <View className="action-icon">📊</View>
+            <Text className="action-text">回收记录</Text>
+          </View>
         </View>
-      </Card>
+      </View>
     </View>
   )
 }
+
+export default Scan

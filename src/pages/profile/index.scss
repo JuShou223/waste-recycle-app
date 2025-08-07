@@ -1,132 +1,226 @@
-.profile-container {
-  background: #f5f5f5;
-  min-height: 100vh;
-  padding-bottom: 20px;
+.profile-page {
+  padding-bottom: calc(env(safe-area-inset-bottom) + 150px);
+}
+
+.login-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-3xl) var(--spacing-md);
+  text-align: center;
+  min-height: 60vh;
+}
+
+.login-image {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  margin-bottom: var(--spacing-xl);
+  opacity: 0.8;
+}
+
+.login-title {
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.login-desc {
+  font-size: 26px;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-2xl);
+  line-height: 1.5;
+}
+
+.login-btn {
+  padding: var(--spacing-md) var(--spacing-2xl);
+  font-size: 30px;
 }
 
 .profile-header {
-  background: linear-gradient(135deg, #722ed1 0%, #9254de 100%);
-  padding: 40px 20px 20px;
+  margin: var(--spacing-md);
+  padding: var(--spacing-xl);
+  background: linear-gradient(135deg, var(--color-primary) 0%, #16a34a 100%);
+  border-radius: var(--border-radius-xl);
   color: white;
+}
+
+.user-info {
   display: flex;
   align-items: center;
+}
 
-  .user-avatar {
-    margin-right: 16px;
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin-right: var(--spacing-lg);
+  border: 4px solid rgba(255, 255, 255, 0.2);
+}
 
-    .avatar-image {
-      width: 80px;
-      height: 80px;
-      border-radius: 40px;
-      border: 3px solid rgba(255, 255, 255, 0.3);
-    }
-  }
+.info {
+  flex: 1;
+}
 
-  .user-details {
-    flex: 1;
+.nickname {
+  display: block;
+  font-size: 36px;
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+}
 
-    .username {
-      font-size: 20px;
-      font-weight: 600;
-      display: block;
-      margin-bottom: 4px;
-    }
+.phone {
+  display: block;
+  font-size: 26px;
+  opacity: 0.9;
+  margin-bottom: var(--spacing-sm);
+}
 
-    .user-phone {
-      font-size: 14px;
-      opacity: 0.9;
-      display: block;
-      margin-bottom: 4px;
-    }
+.level-badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--border-radius-sm);
+}
 
-    .join-info {
-      font-size: 12px;
-      opacity: 0.7;
-    }
-  }
-
-  .edit-btn {
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
-  }
+.level-text {
+  font-size: 22px;
+  font-weight: 500;
 }
 
 .stats-section {
-  display: flex;
-  padding: 20px 16px;
-  gap: 12px;
+  margin: var(--spacing-md);
+  padding: var(--spacing-lg);
+}
 
-  .stat-card {
-    flex: 1;
-    background: white;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-md);
+}
 
-    .stat-number {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--primary-color);
-      display: block;
-      margin-bottom: 8px;
-    }
-
-    .stat-label {
-      font-size: 12px;
-      color: var(--text-secondary);
-    }
+.stat-item {
+  text-align: center;
+  padding: var(--spacing-md);
+  cursor: pointer;
+  border-radius: var(--border-radius-md);
+  transition: all 0.3s ease;
+  
+  &:active {
+    background: var(--color-bg-secondary);
   }
+}
+
+.stat-number {
+  display: block;
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.stat-label {
+  display: block;
+  font-size: 24px;
+  color: var(--color-text-secondary);
 }
 
 .menu-section {
-  margin: 0 16px 20px;
+  margin: var(--spacing-md);
+  padding: 0;
+  overflow: hidden;
+}
 
-  .menu-card {
-    border-radius: 12px;
-    overflow: hidden;
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-lg);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid var(--color-border-light);
+  
+  &:last-child {
+    border-bottom: none;
   }
-
-  .menu-item {
-    display: flex;
-    align-items: center;
-    padding: 4px 0;
-
-    .menu-icon {
-      font-size: 20px;
-      margin-right: 16px;
-      width: 24px;
-      text-align: center;
-    }
-
-    .menu-content {
-      .menu-title {
-        font-size: 16px;
-        font-weight: 500;
-        color: var(--text-primary);
-        display: block;
-        margin-bottom: 4px;
-      }
-
-      .menu-desc {
-        font-size: 12px;
-        color: var(--text-secondary);
-      }
-    }
+  
+  &:active {
+    background: var(--color-bg-secondary);
   }
 }
 
-.logout-section {
-  padding: 0 16px;
+.menu-icon {
+  font-size: 36px;
+  margin-right: var(--spacing-md);
+  width: 50px;
+}
 
-  .logout-btn {
-    width: 100%;
-    height: 48px;
-    border-radius: 8px;
-    background: #fff;
-    border: 1px solid #d9d9d9;
-    color: var(--text-primary);
+.menu-text {
+  flex: 1;
+  font-size: 28px;
+  color: var(--color-text-primary);
+}
+
+.menu-arrow {
+  font-size: 32px;
+  color: var(--color-text-light);
+}
+
+.achievement-section {
+  margin: var(--spacing-md);
+  padding: var(--spacing-lg);
+}
+
+.section-title {
+  font-size: 30px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-lg);
+}
+
+.achievement-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-md);
+}
+
+.achievement-item {
+  text-align: center;
+  padding: var(--spacing-md);
+  background: var(--color-bg-secondary);
+  border-radius: var(--border-radius-md);
+}
+
+.achievement-icon {
+  font-size: 40px;
+  margin-bottom: var(--spacing-sm);
+}
+
+.achievement-text {
+  font-size: 24px;
+  color: var(--color-text-primary);
+}
+
+.logout-section {
+  margin: var(--spacing-xl) var(--spacing-md);
+}
+
+.logout-btn {
+  background: var(--color-error);
+  color: white;
+  text-align: center;
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:active {
+    opacity: 0.8;
+  }
+  
+  text {
+    font-size: 30px;
+    font-weight: 500;
   }
 }

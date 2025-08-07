@@ -1,114 +1,214 @@
+import React, { useState, useEffect } from 'react'
 import { View, Text, Image } from '@tarojs/components'
-import { navigateTo, showToast } from '@tarojs/taro'
-import { Button, Card, Cell } from '@nutui/nutui-react-taro'
+import Taro from '@tarojs/taro'
+import { User } from '@/types'
+import { STORAGE_KEYS } from '@/constants'
+import storage from '@/utils/storage'
 import './index.scss'
 
-export default function Profile() {
-  const userInfo = {
-    nickname: '环保达人',
-    avatar: 'https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop',
-    phone: '138****8888',
-    points: 1250,
-    totalRecycle: 28,
-    totalWeight: '3.2kg',
-    joinDate: '2023-03-15'
-  }
+const Profile: React.FC = () => {
+  const [user, setUser] = useState<User | null>(null)
 
-  const menuItems = [
-    { title: '我的设备', icon: '📱', path: '/pages/devices/index', desc: '已绑定设备记录' },
-    { title: '回收记录', icon: '📝', path: '/pages/history/index', desc: '查看投递历史' },
-    { title: '消息通知', icon: '🔔', path: '/pages/messages/index', desc: '系统消息和通知' },
-    { title: '设置', icon: '⚙️', path: '/pages/settings/index', desc: '个人偏好设置' },
-    { title: '帮助中心', icon: '❓', path: '/pages/help/index', desc: '常见问题解答' },
-    { title: '关于我们', icon: 'ℹ️', path: '/pages/about/index', desc: '了解更多信息' }
-  ]
+  useEffect(() => {
+    loadUserInfo()
+  }, [])
 
-  const handleNavigation = (path: string) => {
-    if (path.includes('/pages/devices/') || path.includes('/pages/settings/') || 
-        path.includes('/pages/help/') || path.includes('/pages/about/')) {
-      showToast({
-        title: '功能开发中',
-        icon: 'none'
+  const loadUserInfo = async () => {
+    const userInfo = storage.getSync<User>(STORAGE_KEYS.USER_INFO)
+    if (userInfo) {
+      setUser(userInfo)
+    } else {
+      // 如果没有用户信息，跳转到登录页
+      Taro.navigateTo({
+        url: '/pages/login/index'
       })
-      return
     }
-    navigateTo({ url: path })
   }
 
-  const handleLogout = () => {
-    showToast({
-      title: '退出登录成功',
-      icon: 'success'
+  const handleLogin = () => {
+    Taro.navigateTo({
+      url: '/pages/login/index'
     })
   }
 
-  return (
-    <View className='profile-container'>
-      {/* User Info Header */}
-      <View className='profile-header'>
-        <View className='user-avatar'>
+  const handleMessages = () => {
+    Taro.navigateTo({
+      url: '/pages/messages/index'
+    })
+  }
+
+  const handlePointsDetail = () => {
+    Taro.navigateTo({
+      url: '/pages/points-detail/index'
+    })
+  }
+
+  const handleShare = () => {
+    Taro.showShareMenu({
+      withShareTicket: true
+    })
+  }
+
+  const handleFeedback = () => {
+    Taro.showToast({
+      title: '功能开发中',
+      icon: 'none'
+    })
+  }
+
+  const handleAbout = () => {
+    Taro.showModal({
+      title: '关于我们',
+      content: '智能垃圾回收小程序 v1.0.0\n致力于让垃圾分类变得更简单、更有趣',
+      showCancel: false
+    })
+  }
+
+  const handleLogout = () => {
+    Taro.showModal({
+      title: '确认退出',
+      content: '退出登录后需要重新登录才能使用',
+      success: (res) => {
+        if (res.confirm) {
+          storage.removeSync(STORAGE_KEYS.TOKEN)
+          storage.removeSync(STORAGE_KEYS.USER_INFO)
+          setUser(null)
+          Taro.showToast({
+            title: '已退出登录',
+            icon: 'success'
+          })
+        }
+      }
+    })
+  }
+
+  if (!user) {
+    return (
+      <View className="page profile-page">
+        <View className="login-prompt">
           <Image 
-            className='avatar-image'
-            src={userInfo.avatar}
-            mode='aspectFill'
+            className="login-image"
+            src="https://images.pexels.com/photos/771742/pexels-photo-771742.jpeg?auto=compress&cs=tinysrgb&w=200"
           />
-        </View>
-        <View className='user-details'>
-          <Text className='username'>{userInfo.nickname}</Text>
-          <Text className='user-phone'>{userInfo.phone}</Text>
-          <Text className='join-info'>加入时间: {userInfo.joinDate}</Text>
-        </View>
-        <Button size='small' type='primary' className='edit-btn'>编辑</Button>
-      </View>
-
-      {/* Stats Cards */}
-      <View className='stats-section'>
-        <View className='stat-card'>
-          <Text className='stat-number'>{userInfo.points}</Text>
-          <Text className='stat-label'>当前积分</Text>
-        </View>
-        <View className='stat-card'>
-          <Text className='stat-number'>{userInfo.totalRecycle}</Text>
-          <Text className='stat-label'>回收次数</Text>
-        </View>
-        <View className='stat-card'>
-          <Text className='stat-number'>{userInfo.totalWeight}</Text>
-          <Text className='stat-label'>累计重量</Text>
+          <Text className="login-title">登录后享受更多服务</Text>
+          <Text className="login-desc">记录回收历史，赚取积分奖励</Text>
+          <View className="login-btn btn btn-primary" onClick={handleLogin}>
+            <Text>立即登录</Text>
+          </View>
         </View>
       </View>
+    )
+  }
 
-      {/* Menu Items */}
-      <View className='menu-section'>
-        <Card className='menu-card'>
-          {menuItems.map((item, index) => (
-            <Cell
-              key={index}
-              title={
-                <View className='menu-item'>
-                  <Text className='menu-icon'>{item.icon}</Text>
-                  <View className='menu-content'>
-                    <Text className='menu-title'>{item.title}</Text>
-                    <Text className='menu-desc'>{item.desc}</Text>
-                  </View>
-                </View>
-              }
-              isLink
-              onClick={() => handleNavigation(item.path)}
-            />
-          ))}
-        </Card>
+  return (
+    <View className="page profile-page">
+      {/* 用户信息头部 */}
+      <View className="profile-header">
+        <View className="user-info">
+          <Image className="avatar" src={user.avatar} />
+          <View className="info">
+            <Text className="nickname">{user.nickname}</Text>
+            <Text className="phone">{user.phone}</Text>
+            <View className="level-badge">
+              <Text className="level-text">{user.level}</Text>
+            </View>
+          </View>
+        </View>
       </View>
 
-      {/* Logout */}
-      <View className='logout-section'>
-        <Button 
-          type='default' 
-          className='logout-btn'
-          onClick={handleLogout}
-        >
-          退出登录
-        </Button>
+      {/* 数据统计 */}
+      <View className="stats-section card">
+        <View className="stats-row">
+          <View className="stat-item" onClick={handlePointsDetail}>
+            <Text className="stat-number">{user.points}</Text>
+            <Text className="stat-label">我的积分</Text>
+          </View>
+          <View className="stat-item">
+            <Text className="stat-number">{user.totalRecycles}</Text>
+            <Text className="stat-label">回收次数</Text>
+          </View>
+          <View className="stat-item">
+            <Text className="stat-number">12</Text>
+            <Text className="stat-label">今日排名</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* 功能菜单 */}
+      <View className="menu-section card">
+        <View className="menu-item" onClick={handleMessages}>
+          <View className="menu-icon">📮</View>
+          <Text className="menu-text">消息通知</Text>
+          <View className="menu-arrow">›</View>
+        </View>
+        
+        <View className="menu-item" onClick={handlePointsDetail}>
+          <View className="menu-icon">💎</View>
+          <Text className="menu-text">积分明细</Text>
+          <View className="menu-arrow">›</View>
+        </View>
+
+        <View className="menu-item">
+          <View className="menu-icon">🏆</View>
+          <Text className="menu-text">我的成就</Text>
+          <View className="menu-arrow">›</View>
+        </View>
+
+        <View className="menu-item">
+          <View className="menu-icon">📱</View>
+          <Text className="menu-text">我的设备</Text>
+          <View className="menu-arrow">›</View>
+        </View>
+      </View>
+
+      {/* 其他功能 */}
+      <View className="menu-section card">
+        <View className="menu-item" onClick={handleShare}>
+          <View className="menu-icon">📤</View>
+          <Text className="menu-text">邀请好友</Text>
+          <View className="menu-arrow">›</View>
+        </View>
+
+        <View className="menu-item" onClick={handleFeedback}>
+          <View className="menu-icon">💬</View>
+          <Text className="menu-text">意见反馈</Text>
+          <View className="menu-arrow">›</View>
+        </View>
+
+        <View className="menu-item" onClick={handleAbout}>
+          <View className="menu-icon">ℹ️</View>
+          <Text className="menu-text">关于我们</Text>
+          <View className="menu-arrow">›</View>
+        </View>
+      </View>
+
+      {/* 环保成就 */}
+      <View className="achievement-section card">
+        <Text className="section-title">我的环保成就</Text>
+        <View className="achievement-grid">
+          <View className="achievement-item">
+            <View className="achievement-icon">🌱</View>
+            <Text className="achievement-text">环保新手</Text>
+          </View>
+          <View className="achievement-item">
+            <View className="achievement-icon">🏆</View>
+            <Text className="achievement-text">回收达人</Text>
+          </View>
+          <View className="achievement-item">
+            <View className="achievement-icon">🌟</View>
+            <Text className="achievement-text">积分之星</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* 退出登录 */}
+      <View className="logout-section">
+        <View className="logout-btn" onClick={handleLogout}>
+          <Text>退出登录</Text>
+        </View>
       </View>
     </View>
   )
 }
+
+export default Profile

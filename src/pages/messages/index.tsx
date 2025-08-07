@@ -1,50 +1,95 @@
+import React, { useState, useEffect } from 'react'
 import { View, Text } from '@tarojs/components'
-import { Card, Badge, Button } from '@nutui/nutui-react-taro'
+import { Message } from '@/types'
+import Loading from '@/components/Loading'
+import Empty from '@/components/Empty'
 import './index.scss'
 
-export default function Messages() {
-  const messages = [
-    {
-      id: 1,
-      type: 'recycle',
-      title: '回收成功',
-      content: '您投递的废纸 0.8kg 已成功回收，获得 20 积分',
-      time: '2小时前',
-      read: false
-    },
-    {
-      id: 2,
-      type: 'activity',
-      title: '积分双倍活动',
-      content: '🎉 本周积分双倍活动正在进行中，快来参与吧！',
-      time: '1天前',
-      read: false
-    },
-    {
-      id: 3,
-      type: 'system',
-      title: '系统升级通知',
-      content: '系统将于今晚2:00-4:00进行升级维护，期间服务可能短暂中断',
-      time: '2天前',
-      read: true
-    },
-    {
-      id: 4,
-      type: 'recycle',
-      title: '回收成功',
-      content: '您投递的塑料瓶 0.3kg 已成功回收，获得 15 积分',
-      time: '3天前',
-      read: true
-    },
-    {
-      id: 5,
-      type: 'activity',
-      title: '环保排行榜更新',
-      content: '恭喜您在本月环保排行榜中排名第15位！',
-      time: '5天前',
-      read: true
+const Messages: React.FC = () => {
+  const [messages, setMessages] = useState<Message[]>([])
+  const [loading, setLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState('all')
+
+  useEffect(() => {
+    loadMessages()
+  }, [])
+
+  const loadMessages = async () => {
+    setLoading(true)
+    try {
+      // 模拟加载消息数据
+      setTimeout(() => {
+        const mockMessages: Message[] = [
+          {
+            id: '1',
+            title: '投递成功通知',
+            content: '您在小区A栋回收箱的投递已完成，获得25积分奖励！',
+            type: 'recycle',
+            isRead: false,
+            createTime: '2025-01-11 14:30'
+          },
+          {
+            id: '2',
+            title: '环保活动邀请',
+            content: '本周六将举办"绿色地球"环保主题活动，参与可获得额外积分奖励！',
+            type: 'activity',
+            isRead: false,
+            createTime: '2025-01-11 09:15'
+          },
+          {
+            id: '3',
+            title: '积分兑换成功',
+            content: '您的10元现金红包已兑换成功，将在24小时内发放到您的微信零钱。',
+            type: 'recycle',
+            isRead: true,
+            createTime: '2025-01-10 16:45'
+          },
+          {
+            id: '4',
+            title: '系统维护通知',
+            content: '系统将于今晚22:00-24:00进行维护升级，期间可能影响部分功能使用。',
+            type: 'system',
+            isRead: true,
+            createTime: '2025-01-10 12:00'
+          },
+          {
+            id: '5',
+            title: '排行榜更新',
+            content: '本周环保排行榜已更新，您目前排名第12位，继续加油！',
+            type: 'activity',
+            isRead: true,
+            createTime: '2025-01-09 20:30'
+          },
+          {
+            id: '6',
+            title: '积分加倍活动',
+            content: '本周末积分加倍活动开启！投递垃圾可获得双倍积分奖励！',
+            type: 'activity',
+            isRead: true,
+            createTime: '2025-01-08 10:00'
+          }
+        ]
+        setMessages(mockMessages)
+        setLoading(false)
+      }, 1000)
+    } catch (error) {
+      setLoading(false)
     }
-  ]
+  }
+
+  const handleMarkRead = (messageId: string) => {
+    setMessages(prevMessages =>
+      prevMessages.map(msg =>
+        msg.id === messageId ? { ...msg, isRead: true } : msg
+      )
+    )
+  }
+
+  const handleMarkAllRead = () => {
+    setMessages(prevMessages =>
+      prevMessages.map(msg => ({ ...msg, isRead: true }))
+    )
+  }
 
   const getMessageIcon = (type: string) => {
     switch (type) {
@@ -55,91 +100,136 @@ export default function Messages() {
       case 'system':
         return '⚙️'
       default:
-        return '📝'
+        return '📢'
     }
   }
 
-  const getMessageTypeColor = (type: string) => {
+  const getMessageTypeText = (type: string) => {
     switch (type) {
       case 'recycle':
-        return '#52c41a'
+        return '回收通知'
       case 'activity':
-        return '#fa541c'
+        return '活动通知'
       case 'system':
-        return '#1890ff'
+        return '系统消息'
       default:
-        return '#666'
+        return '其他'
     }
   }
 
-  const unreadCount = messages.filter(msg => !msg.read).length
+  const filteredMessages = messages.filter(msg => {
+    if (activeTab === 'all') return true
+    if (activeTab === 'unread') return !msg.isRead
+    return msg.type === activeTab
+  })
 
-  const handleMarkAllRead = () => {
-    // Mark all messages as read
-    console.log('Mark all as read')
-  }
+  const unreadCount = messages.filter(msg => !msg.isRead).length
 
-  const handleClearAll = () => {
-    // Clear all messages
-    console.log('Clear all messages')
-  }
+  const tabs = [
+    { key: 'all', name: '全部' },
+    { key: 'unread', name: `未读(${unreadCount})` },
+    { key: 'recycle', name: '回收通知' },
+    { key: 'activity', name: '活动通知' },
+    { key: 'system', name: '系统消息' }
+  ]
 
   return (
-    <View className='messages-container'>
-      {/* Header */}
-      <View className='messages-header'>
-        <View className='header-content'>
-          <Text className='header-title'>消息通知</Text>
-          {unreadCount > 0 && (
-            <Badge value={unreadCount} max={99}>
-              <Text className='unread-text'>未读消息</Text>
-            </Badge>
-          )}
+    <View className="page messages-page">
+      {/* 消息统计 */}
+      <View className="messages-header card">
+        <View className="stats-row">
+          <View className="stat-item">
+            <Text className="stat-number">{messages.length}</Text>
+            <Text className="stat-label">总消息</Text>
+          </View>
+          <View className="stat-item">
+            <Text className="stat-number">{unreadCount}</Text>
+            <Text className="stat-label">未读消息</Text>
+          </View>
         </View>
         
-        <View className='header-actions'>
-          <Button size='small' type='default' onClick={handleMarkAllRead}>
-            全部已读
-          </Button>
-          <Button size='small' type='default' onClick={handleClearAll}>
-            清空消息
-          </Button>
-        </View>
+        {unreadCount > 0 && (
+          <View className="mark-all-btn" onClick={handleMarkAllRead}>
+            <Text>全部标记已读</Text>
+          </View>
+        )}
       </View>
 
-      {/* Message List */}
-      <View className='messages-list'>
-        {messages.map((message) => (
-          <Card key={message.id} className={`message-card ${message.read ? 'read' : 'unread'}`}>
-            <View className='message-item'>
-              <View className='message-icon' style={{ color: getMessageTypeColor(message.type) }}>
-                {getMessageIcon(message.type)}
-              </View>
-              
-              <View className='message-content'>
-                <View className='message-header'>
-                  <Text className='message-title'>{message.title}</Text>
-                  <Text className='message-time'>{message.time}</Text>
-                </View>
-                
-                <Text className='message-text'>{message.content}</Text>
-                
-                {!message.read && (
-                  <View className='unread-dot'></View>
-                )}
-              </View>
-            </View>
-          </Card>
+      {/* 消息分类标签 */}
+      <View className="message-tabs">
+        {tabs.map((tab) => (
+          <View
+            key={tab.key}
+            className={`tab-item ${activeTab === tab.key ? 'active' : ''}`}
+            onClick={() => setActiveTab(tab.key)}
+          >
+            <Text>{tab.name}</Text>
+          </View>
         ))}
       </View>
 
-      {messages.length === 0 && (
-        <View className='empty-state'>
-          <Text className='empty-icon'>📮</Text>
-          <Text className='empty-text'>暂无消息</Text>
-          <Text className='empty-desc'>所有消息通知会在这里显示</Text>
+      {/* 消息列表 */}
+      <View className="messages-list">
+        {loading ? (
+          <Loading text="加载中..." />
+        ) : filteredMessages.length > 0 ? (
+          <View className="list-content card">
+            {filteredMessages.map((message) => (
+              <View 
+                key={message.id} 
+                className={`message-item ${!message.isRead ? 'unread' : ''}`}
+                onClick={() => handleMarkRead(message.id)}
+              >
+                <View className="message-icon">
+                  {getMessageIcon(message.type)}
+                </View>
+                
+                <View className="message-content">
+                  <View className="message-header">
+                    <Text className="message-title">{message.title}</Text>
+                    <Text className="message-time">{message.createTime}</Text>
+                  </View>
+                  
+                  <Text className="message-text">{message.content}</Text>
+                  
+                  <View className="message-meta">
+                    <Text className="message-type">{getMessageTypeText(message.type)}</Text>
+                    {!message.isRead && (
+                      <View className="unread-dot"></View>
+                    )}
+                  </View>
+                </View>
+              </View>
+            ))}
+          </View>
+        ) : (
+          <Empty
+            title="暂无消息"
+            description={activeTab === 'unread' ? '所有消息都已阅读' : '暂时没有消息通知'}
+          />
+        )}
+      </View>
+
+      {/* 消息设置 */}
+      <View className="settings-section card">
+        <Text className="settings-title">消息设置</Text>
+        <View className="settings-list">
+          <View className="setting-item">
+            <Text className="setting-text">回收成功通知</Text>
+            <View className="setting-switch on"></View>
+          </View>
+          <View className="setting-item">
+            <Text className="setting-text">活动推送通知</Text>
+            <View className="setting-switch on"></View>
+          </View>
+          <View className="setting-item">
+            <Text className="setting-text">系统维护通知</Text>
+            <View className="setting-switch on"></View>
+          </View>
         </View>
-      )}
+      </View>
     </View>
   )
 }
+
+export default Messages

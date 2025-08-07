@@ -1,125 +1,214 @@
-import { View, Text, Image } from '@tarojs/components'
-import { navigateTo } from '@tarojs/taro'
-import { Button, Card, Progress } from '@nutui/nutui-react-taro'
+import React, { useState, useEffect } from 'react'
+import { View, Text } from '@tarojs/components'
+import Taro from '@tarojs/taro'
+import { PointsRecord } from '@/types'
+import Loading from '@/components/Loading'
+import Empty from '@/components/Empty'
 import './index.scss'
 
-export default function Points() {
-  const userStats = {
-    totalPoints: 1250,
-    thisMonthPoints: 380,
-    rank: 15,
-    nextLevelPoints: 1500
-  }
+const Points: React.FC = () => {
+  const [totalPoints, setTotalPoints] = useState(1250)
+  const [records, setRecords] = useState<PointsRecord[]>([])
+  const [loading, setLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState('all')
 
-  const exchangeItems = [
-    { id: 1, name: '星巴克咖啡券', points: 500, image: 'https://images.pexels.com/photos/312418/pexels-photo-312418.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
-    { id: 2, name: '10元现金红包', points: 1000, image: 'https://images.pexels.com/photos/259027/pexels-photo-259027.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
-    { id: 3, name: '环保购物袋', points: 200, image: 'https://images.pexels.com/photos/1029896/pexels-photo-1029896.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' },
-    { id: 4, name: '竹制餐具套装', points: 800, image: 'https://images.pexels.com/photos/4099354/pexels-photo-4099354.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop' }
-  ]
+  useEffect(() => {
+    loadPointsData()
+  }, [])
 
-  const pointsHistory = [
-    { date: '2024-01-15', action: '投递塑料瓶', weight: '0.3kg', points: 15 },
-    { date: '2024-01-14', action: '投递废纸', weight: '0.8kg', points: 20 },
-    { date: '2024-01-13', action: '投递金属罐', weight: '0.2kg', points: 25 },
-    { date: '2024-01-12', action: '投递废纸', weight: '1.2kg', points: 30 }
-  ]
-
-  const progressPercent = (userStats.totalPoints / userStats.nextLevelPoints) * 100
-
-  const handleExchange = (item: any) => {
-    if (userStats.totalPoints >= item.points) {
-      // Handle exchange logic
-      console.log('Exchange item:', item)
+  const loadPointsData = async () => {
+    setLoading(true)
+    try {
+      // 模拟加载积分记录
+      setTimeout(() => {
+        setRecords([
+          {
+            id: '1',
+            type: 'earn',
+            amount: 25,
+            source: 'recycle',
+            description: '投递可回收垃圾获得积分',
+            createTime: '2025-01-11 14:30'
+          },
+          {
+            id: '2',
+            type: 'earn',
+            amount: 30,
+            source: 'recycle',
+            description: '投递有害垃圾获得积分',
+            createTime: '2025-01-11 10:15'
+          },
+          {
+            id: '3',
+            type: 'spend',
+            amount: 100,
+            source: 'exchange',
+            description: '兑换10元现金红包',
+            createTime: '2025-01-10 16:20'
+          },
+          {
+            id: '4',
+            type: 'earn',
+            amount: 50,
+            source: 'activity',
+            description: '参与环保活动获得奖励',
+            createTime: '2025-01-10 09:30'
+          }
+        ])
+        setLoading(false)
+      }, 1000)
+    } catch (error) {
+      setLoading(false)
     }
   }
 
+  const handleExchange = () => {
+    Taro.navigateTo({
+      url: '/pages/exchange/index'
+    })
+  }
+
+  const handleRanking = () => {
+    Taro.navigateTo({
+      url: '/pages/ranking/index'
+    })
+  }
+
+  const filteredRecords = records.filter(record => {
+    if (activeTab === 'all') return true
+    return record.type === activeTab
+  })
+
   return (
-    <View className='points-container'>
-      {/* Points Header */}
-      <View className='points-header'>
-        <View className='points-summary'>
-          <Text className='total-points'>{userStats.totalPoints}</Text>
-          <Text className='points-label'>当前积分</Text>
+    <View className="page points-page">
+      {/* 积分总览 */}
+      <View className="points-header">
+        <View className="points-card">
+          <Text className="points-title">我的积分</Text>
+          <Text className="points-amount">{totalPoints}</Text>
+          <Text className="points-desc">可兑换现金红包和精美礼品</Text>
         </View>
         
-        <View className='level-progress'>
-          <View className='level-info'>
-            <Text className='level-text'>距离下一等级还需 {userStats.nextLevelPoints - userStats.totalPoints} 积分</Text>
+        <View className="actions-row">
+          <View className="action-btn primary" onClick={handleExchange}>
+            <Text className="btn-text">兑换商品</Text>
           </View>
-          <Progress percent={progressPercent} color='#52c41a' />
-        </View>
-
-        <View className='stats-row'>
-          <View className='stat-item'>
-            <Text className='stat-number'>{userStats.thisMonthPoints}</Text>
-            <Text className='stat-label'>本月积分</Text>
-          </View>
-          <View className='stat-item'>
-            <Text className='stat-number'>{userStats.rank}</Text>
-            <Text className='stat-label'>环保排名</Text>
+          <View className="action-btn outline" onClick={handleRanking}>
+            <Text className="btn-text">查看排行</Text>
           </View>
         </View>
       </View>
 
-      {/* Quick Actions */}
-      <View className='action-section'>
-        <Button 
-          type='primary' 
-          className='action-btn'
-          onClick={() => navigateTo({ url: '/pages/exchange/index' })}
-        >
-          积分兑换
-        </Button>
-        <Button 
-          type='default' 
-          className='action-btn'
-          onClick={() => navigateTo({ url: '/pages/ranking/index' })}
-        >
-          查看排行榜
-        </Button>
+      {/* 积分统计 */}
+      <View className="stats-section card">
+        <Text className="section-title">本月统计</Text>
+        <View className="stats-grid">
+          <View className="stat-item">
+            <Text className="stat-number">385</Text>
+            <Text className="stat-label">获得积分</Text>
+          </View>
+          <View className="stat-item">
+            <Text className="stat-number">200</Text>
+            <Text className="stat-label">消费积分</Text>
+          </View>
+          <View className="stat-item">
+            <Text className="stat-number">12</Text>
+            <Text className="stat-label">投递次数</Text>
+          </View>
+          <View className="stat-item">
+            <Text className="stat-number">3</Text>
+            <Text className="stat-label">兑换次数</Text>
+          </View>
+        </View>
       </View>
 
-      {/* Exchange Items */}
-      <View className='section'>
-        <Text className='section-title'>热门兑换</Text>
-        <View className='exchange-grid'>
-          {exchangeItems.map((item) => (
-            <View key={item.id} className='exchange-item'>
-              <Image className='item-image' src={item.image} mode='aspectFill' />
-              <Text className='item-name'>{item.name}</Text>
-              <View className='item-footer'>
-                <Text className='item-points'>{item.points}积分</Text>
-                <Button 
-                  size='small'
-                  type={userStats.totalPoints >= item.points ? 'primary' : 'default'}
-                  disabled={userStats.totalPoints < item.points}
-                  onClick={() => handleExchange(item)}
-                >
-                  {userStats.totalPoints >= item.points ? '兑换' : '积分不足'}
-                </Button>
+      {/* 积分记录 */}
+      <View className="records-section">
+        <View className="records-header">
+          <Text className="section-title">积分明细</Text>
+        </View>
+        
+        <View className="tabs">
+          <View 
+            className={`tab-item ${activeTab === 'all' ? 'active' : ''}`}
+            onClick={() => setActiveTab('all')}
+          >
+            <Text>全部</Text>
+          </View>
+          <View 
+            className={`tab-item ${activeTab === 'earn' ? 'active' : ''}`}
+            onClick={() => setActiveTab('earn')}
+          >
+            <Text>收入</Text>
+          </View>
+          <View 
+            className={`tab-item ${activeTab === 'spend' ? 'active' : ''}`}
+            onClick={() => setActiveTab('spend')}
+          >
+            <Text>支出</Text>
+          </View>
+        </View>
+
+        <View className="records-list card">
+          {loading ? (
+            <Loading text="加载中..." />
+          ) : filteredRecords.length > 0 ? (
+            filteredRecords.map((record) => (
+              <View key={record.id} className="record-item">
+                <View className="record-info">
+                  <Text className="record-desc">{record.description}</Text>
+                  <Text className="record-time">{record.createTime}</Text>
+                </View>
+                <Text className={`record-amount ${record.type}`}>
+                  {record.type === 'earn' ? '+' : '-'}{record.amount}
+                </Text>
               </View>
-            </View>
-          ))}
+            ))
+          ) : (
+            <Empty
+              title="暂无积分记录"
+              description="赶快去回收垃圾赚取积分吧！"
+            />
+          )}
         </View>
       </View>
 
-      {/* Points History */}
-      <View className='section'>
-        <Text className='section-title'>积分记录</Text>
-        <Card className='history-card'>
-          {pointsHistory.map((record, index) => (
-            <View key={index} className='history-item'>
-              <View className='history-info'>
-                <Text className='history-action'>{record.action}</Text>
-                <Text className='history-detail'>重量: {record.weight}</Text>
-                <Text className='history-date'>{record.date}</Text>
-              </View>
-              <Text className='history-points'>+{record.points}</Text>
+      {/* 积分规则 */}
+      <View className="rules-section card">
+        <Text className="section-title">积分规则</Text>
+        <View className="rules-list">
+          <View className="rule-item">
+            <View className="rule-icon earn">+</View>
+            <View className="rule-content">
+              <Text className="rule-title">投递垃圾</Text>
+              <Text className="rule-desc">每投递1kg垃圾获得10积分</Text>
             </View>
-          ))}
-        </Card>
+          </View>
+          <View className="rule-item">
+            <View className="rule-icon earn">+</View>
+            <View className="rule-content">
+              <Text className="rule-title">分享好友</Text>
+              <Text className="rule-desc">成功邀请好友注册获得50积分</Text>
+            </View>
+          </View>
+          <View className="rule-item">
+            <View className="rule-icon earn">+</View>
+            <View className="rule-content">
+              <Text className="rule-title">活动奖励</Text>
+              <Text className="rule-desc">参与官方活动获得额外积分</Text>
+            </View>
+          </View>
+          <View className="rule-item">
+            <View className="rule-icon spend">-</View>
+            <View className="rule-content">
+              <Text className="rule-title">兑换商品</Text>
+              <Text className="rule-desc">使用积分兑换现金和礼品</Text>
+            </View>
+          </View>
+        </View>
       </View>
     </View>
   )
 }
+
+export default Points
